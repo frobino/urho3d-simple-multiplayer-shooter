@@ -148,8 +148,8 @@ namespace Ingame
             String info = nickname_ + "\n";
             if (isSpawned_)
             {
-                int lives = Floor (localSceneManager.playerLives);
-                int exp = localSceneManager.playerExp;
+                int lives = Floor (localSceneManager.get_playerLives());
+                int exp = localSceneManager.get_playerExp();
                 int maxLives = Floor (GameplayConstants__BASIC_MAX_HEALTH * 
                                       (1.0f + exp * GameplayConstants__MAX_HEALTH_INCREASE_PER_EXP));
                 info += lives + "/" + maxLives + " HP.\n" + exp + " EXP.";
@@ -178,8 +178,8 @@ namespace Ingame
         
         void UpdatePlayersLabels ()
         {
-            Array <Node @> otherPlayersNodes = localSceneManager.otherPlayersNodes;
-            Node @cameraNode = localSceneManager.cameraNode;
+            Array <Node @> otherPlayersNodes = localSceneManager.get_otherPlayersNodes();
+            Node @cameraNode = localSceneManager.get_cameraNode();
             Camera @camera = cameraNode.GetComponent ("Camera");
                     
             for (int index = 0; index < otherPlayersLabels_.length; index++)

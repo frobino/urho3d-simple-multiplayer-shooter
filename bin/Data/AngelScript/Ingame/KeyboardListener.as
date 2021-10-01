@@ -41,7 +41,7 @@ namespace Ingame
             if (input.keyPress [KEY_SEND_CHAT_MESSAGE] and stateUi.messageEdit_.focus == true)
                 networkHandler.SendChatMessage ();
              
-            if (localSceneManager.playerNode !is null 
+            if (localSceneManager.get_playerNode() !is null 
                 and timeFromLastMoveRequest >= TIME_BETWEEN_MOVE_REQUESTS_SENDING)
             {
                 Vector2 moveRequest = Vector2 (0, 0);
@@ -64,7 +64,7 @@ namespace Ingame
             if (input.keyPress [KEY_FIRE] and stateUi.messageEdit_.focus == false)
                 networkHandler.SendFireRequest ();
                 
-            if (localSceneManager.playerNode is null)
+            if (localSceneManager.get_playerNode() is null)
                 timeFromLastMoveRequest = 0.0f;
         }
     };

@@ -77,7 +77,8 @@ SETTER (bool, AiCommands, tryToFireInNextFrame_)
 void AiCommands::BindToAngelScript (Urho3D::Script *script)
 {
     asIScriptEngine *engine = script->GetScriptEngine ();
-    Urho3D::RegisterObject <AiCommands> (engine, "AiCommands");
+    // frobino
+    // Urho3D::RegisterObject <AiCommands> (engine, "AiCommands");
 
     CHECK_ANGELSCRIPT_RETURN (engine->RegisterObjectMethod ("AiCommands",
                                                             "Vector2 get_normalizedMoveRequest ()",

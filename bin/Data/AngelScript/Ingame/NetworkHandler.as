@@ -54,8 +54,8 @@ namespace Ingame
         {
             if (waitingForSpawnSync_)
             {
-                localSceneManager.playerNodeId = playerExpectedId_;
-                if (localSceneManager.playerNodeId == playerExpectedId_)
+                localSceneManager.set_playerNodeId(playerExpectedId_);
+                if (localSceneManager.get_playerNodeId() == playerExpectedId_)
                 {
                     waitingForSpawnSync_ = false;
                     stateUi.isSpawned_ = true;
