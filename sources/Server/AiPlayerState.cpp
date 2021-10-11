@@ -77,8 +77,16 @@ SETTER (bool, AiCommands, tryToFireInNextFrame_)
 void AiCommands::BindToAngelScript (Urho3D::Script *script)
 {
     asIScriptEngine *engine = script->GetScriptEngine ();
-    // frobino
-    // Urho3D::RegisterObject <AiCommands> (engine, "AiCommands");
+    /* Register AiCommands object:
+     * note the AddRef and ReleaseRef functions.
+     * These are mandatory functions to allow Angelscript
+     * to release them from memory when need.
+     * It's not needed to implement them as we
+     * want to use only a reference.
+     */
+    engine->RegisterObjectType("AiCommands", 0, asOBJ_REF);
+    engine->RegisterObjectBehaviour("AiCommands", asBEHAVE_ADDREF, "void f()", asMETHOD(AiCommands, AddRef), asCALL_THISCALL);
+    engine->RegisterObjectBehaviour("AiCommands", asBEHAVE_RELEASE, "void f()", asMETHOD(AiCommands, ReleaseRef), asCALL_THISCALL);
 
     CHECK_ANGELSCRIPT_RETURN (engine->RegisterObjectMethod ("AiCommands",
                                                             "Vector2 get_normalizedMoveRequest ()",

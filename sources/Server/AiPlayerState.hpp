@@ -12,6 +12,10 @@ public:
     Urho3D::Vector2 normalizedMoveRequest_;
     bool tryToFireInNextFrame_;
 
+    // Needed to register AiCommands object in script engine
+    void AddRef() { /* do nothing */ }
+    // Needed to register AiCommands object in script engine
+    void ReleaseRef() { /* do nothing */ }
     static void BindToAngelScript (Urho3D::Script *script);
 };
 
