@@ -11,12 +11,15 @@ It's simple deathmatch shooter game on Urho3D game engine, it supports multiplay
 * Server leaderboard.
 
 ## How to build
-Step 1. Download [Urho3D](https://github.com/urho3d/urho3d) source and build it.
-Recommended version -- current master.
-Also you can build Urho3D from source, for more information visit [Urho3D Site](https://urho3d.github.io).
-Tested with Urho3D commit id: 255f04681a80478b65dbf65ab9e5f4e7fc139a50
+Step 1. Download [U3D](https://github.com/u3d-community/U3D) source and build it.
+Recommended version -- current master (tested with U3D commit id: 8e9c11f7febfd36b382f4c391b3d3747e800a63e).
+Previously tested with Urho3D commit id: 255f04681a80478b65dbf65ab9e5f4e7fc139a50
 
-Step 2. Set `URHO3D_HOME` environment var equal to the Urho3D engine build directory (the one containing the bin/ folder).
+Step 2. Set `URHO3D_HOME` environment var equal to the U3D engine build directory:
+
+```bash
+export URHO3D_HOME=/home/$USER/Projects/U3D/build
+```
 
 Step 3. Clone repository:
 ```bash
@@ -25,9 +28,9 @@ git clone https://github.com/KonstantinTomashevich/urho3d-simple-multiplayer-sho
 Step 4. Copy the CoreData, Module and Toolchain folders from Urho3D to urho3d-simple-multiplayer-shooter
 ```bash
 mkdir -p urho3d-simple-multiplayer-shooter/bin/CoreData
-cp -r Urho3D/bin/CoreData/* urho3d-simple-multiplayer-shooter/bin/CoreData
+cp -r U3D/bin/CoreData/* urho3d-simple-multiplayer-shooter/bin/CoreData
 mkdir -p urho3d-simple-multiplayer-shooter/urho3d-cmake
-cp -r Urho3D/cmake/* urho3d-simple-multiplayer-shooter/urho3d-cmake
+cp -r U3D/cmake/* urho3d-simple-multiplayer-shooter/urho3d-cmake
 ```
 
 Step 5. Generate build directory via CMake:
@@ -38,7 +41,7 @@ Step 6. Build.
 ```bash
 make
 ```
-Step 7. Executables will be in ${BINARY_DIR}/bin folder.
+Step 7. Executables will be in urho3d-simple-multiplayer-shooter/build/bin folder.
 
 ## Screenshots:
 ![1](https://s30.postimg.org/hxgjgbs8h/image.png)
