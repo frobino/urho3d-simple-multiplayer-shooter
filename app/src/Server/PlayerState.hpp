@@ -2,6 +2,7 @@
 #include <Urho3D/Container/Str.h>
 #include <Urho3D/Scene/Node.h>
 #include <Urho3D/Network/Connection.h>
+#include <Urho3D/Graphics/AnimationController.h>
 
 class PlayersManager;
 class Spawner;

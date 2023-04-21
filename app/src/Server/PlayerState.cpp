@@ -95,6 +95,13 @@ void PlayerState::TryToFire ()
         assert (spawner);
         spawner->SpawnShell (this);
         timeFromLastFire_ = 0.0f;
+
+	    // auto* animCtrl = node_->GetComponent<Urho3D::AnimationController>(true);
+        Urho3D::AnimationController *animCtrl = node_->GetComponent<Urho3D::AnimationController>(true);
+        // animCtrl->PlayExclusive("Models/Mutant/Mutant_Jump1.ani", 0, false, 0.2f);
+        animCtrl->PlayExclusive("Models/Mutant/Mutant_Idle0.ani", 0, true, 0.2f);
+
+
     }
 }
 

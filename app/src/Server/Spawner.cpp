@@ -195,6 +195,7 @@ unsigned Spawner::SpawnPlayer (bool isAi, Urho3D::String aiScriptPath)
 
     Urho3D::Node *playerLocal = playerNode->CreateChild ("local", Urho3D::LOCAL);
     Urho3D::ResourceCache *resourceCache = GetSubsystem <Urho3D::ResourceCache> ();
+    // frobino: here it uses the xml
     playerLocal->LoadXML (resourceCache->GetResource <Urho3D::XMLFile> (SceneConstants::PLAYER_LOCAL_PREFAB)->GetRoot ());
 
     Urho3D::SharedPtr <Urho3D::RigidBody> body (playerLocal->GetComponent <Urho3D::RigidBody> ());
