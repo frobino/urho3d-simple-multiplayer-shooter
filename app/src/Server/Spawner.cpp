@@ -1,5 +1,7 @@
 #include "BuildConfiguration.hpp"
 #include "Spawner.hpp"
+#include "Character.h"
+#include <Urho3D/Graphics/AnimatedModel.h>
 #include <Urho3D/Graphics/Octree.h>
 #include <Urho3D/Graphics/Light.h>
 #include <Urho3D/Graphics/Camera.h>
@@ -188,16 +190,33 @@ unsigned Spawner::SpawnPlayer (bool isAi, Urho3D::String aiScriptPath)
 
     Urho3D::Scene *scene = context_->GetSubsystem <Urho3D::Scene> ();
     assert (scene);
+
+    // playerNode == adjustNode?
     Urho3D::Node *playerNode = scene->CreateChild ("player", Urho3D::REPLICATED);
     playerNode->SetPosition (position);
     playerNode->SetRotation (Urho3D::Quaternion (0, Urho3D::Random (360.0f), 0));
     playerNode->SetVar (SerializationConstants::OBJECT_TYPE_VAR_HASH, SerializationConstants::OBJECT_TYPE_PLAYER);
+    URHO3D_LOGINFO("Created PlayerNode node " + String(playerNode->GetID()) + " " + playerNode->GetName());
 
+    // Urho3D::Node *playerNode = CreateCharacter(scene, position);
     Urho3D::Node *playerLocal = playerNode->CreateChild ("local", Urho3D::LOCAL);
     Urho3D::ResourceCache *resourceCache = GetSubsystem <Urho3D::ResourceCache> ();
     // frobino: here it uses the xml
     playerLocal->LoadXML (resourceCache->GetResource <Urho3D::XMLFile> (SceneConstants::PLAYER_LOCAL_PREFAB)->GetRoot ());
+    // CreateCharacterInsteadOfXML(playerLocal, position);
+    // CreateCharacterInsteadOfXML(playerLocal, Urho3D::Vector3::ZERO);
+    URHO3D_LOGINFO("Created PlayerLocal node " + String(playerLocal->GetID()) + " " + playerLocal->GetName());
 
+    /*
+     * Trying to get the node with AnimationController and "force it" to run animation
+    // Urho3D::PODVector<Urho3D::Node *> nodeAC = playerLocal->GetChildrenWithTag("frobino", true);
+    Urho3D::PODVector<Urho3D::Node *> nodeAC = playerLocal->GetChildrenWithComponent("AnimationController", true);
+    Urho3D::Node *foundACnode = nodeAC.At(0);
+    URHO3D_LOGINFO("Found AC node " + String(foundACnode->GetID()) + " " + foundACnode->GetName());
+    Urho3D::AnimationController *animCtrl = foundACnode->GetComponent<Urho3D::AnimationController>(true);
+    animCtrl->PlayExclusive("Models/Mutant/Mutant_Run.ani", 0, false, 0.2f);
+    */
+ 
     Urho3D::SharedPtr <Urho3D::RigidBody> body (playerLocal->GetComponent <Urho3D::RigidBody> ());
     body->Remove ();
     playerNode->AddComponent (body.Get (), Urho3D::FIRST_LOCAL_ID, Urho3D::LOCAL);
@@ -209,9 +228,101 @@ unsigned Spawner::SpawnPlayer (bool isAi, Urho3D::String aiScriptPath)
     if (isAi && !aiScriptPath.Empty ())
     {
         Urho3D::ScriptInstance *aiScript = playerNode->CreateComponent <Urho3D::ScriptInstance> (Urho3D::LOCAL);
+        Urho3D::ResourceCache *resourceCache = GetSubsystem <Urho3D::ResourceCache> ();
         aiScript->CreateObject (resourceCache->GetResource <Urho3D::ScriptFile> (aiScriptPath), "Ai");
     }
     return playerNode->GetID ();
+}
+
+Urho3D::Node *Spawner::CreateCharacter(Urho3D::Scene *scene_, Urho3D::Vector3 position)
+{
+    auto* cache = GetSubsystem<Urho3D::ResourceCache>();
+
+    Urho3D::Node* objectNode = scene_->CreateChild("Jack");
+    objectNode->SetPosition(position);
+
+    // spin node
+    Urho3D::Node* adjustNode = objectNode->CreateChild("AdjNode");
+    adjustNode->SetRotation( Urho3D::Quaternion(180, Urho3D::Vector3(0,1,0) ) );
+
+    // Create the rendering component + animation controller
+    auto* object = adjustNode->CreateComponent<Urho3D::AnimatedModel>();
+    object->SetModel(cache->GetResource<Urho3D::Model>("Models/Mutant/Mutant.mdl"));
+    object->SetMaterial(cache->GetResource<Urho3D::Material>("Models/Mutant/Materials/mutant_M.xml"));
+    object->SetCastShadows(true);
+    adjustNode->CreateComponent<Urho3D::AnimationController>();
+
+    // Set the head bone for manual control
+    object->GetSkeleton().GetBone("Mutant:Head")->animated_ = false;
+
+    // Create rigidbody, and set non-zero mass so that the body becomes dynamic
+    auto* body = objectNode->CreateComponent<Urho3D::RigidBody>();
+    body->SetCollisionLayer(1);
+    body->SetMass(1.0f);
+
+    // Set zero angular factor so that physics doesn't turn the character on its own.
+    // Instead we will control the character yaw manually
+    body->SetAngularFactor(Urho3D::Vector3::ZERO);
+
+    // Set the rigidbody to signal collision also when in rest, so that we get ground collisions properly
+    body->SetCollisionEventMode(Urho3D::COLLISION_ALWAYS);
+
+    // Set a capsule shape for collision
+    auto* shape = objectNode->CreateComponent<Urho3D::CollisionShape>();
+    shape->SetCapsule(0.7f, 1.8f, Urho3D::Vector3(0.0f, 0.9f, 0.0f));
+
+    // Create the character logic component, which takes care of steering the rigidbody
+    // Remember it so that we can set the controls. Use a WeakPtr because the scene hierarchy already owns it
+    // and keeps it alive as long as it's not removed from the hierarchy
+    objectNode->CreateComponent<Character>();
+    return objectNode;
+}
+
+Urho3D::Node *Spawner::CreateCharacterInsteadOfXML(Urho3D::Node *objectNode, Urho3D::Vector3 position)
+{
+ 
+    // ObjectNode (id=8)
+    // Urho3D::Node* objectNode = scene_->CreateChild("Jack");
+    objectNode->SetPosition(position);
+    int myID = objectNode->GetID();
+    URHO3D_LOGINFO("Local Node instead of XML expected 8: " + String(myID));
+
+    // Create rigidbody, and set non-zero mass so that the body becomes dynamic
+    auto* body = objectNode->CreateComponent<Urho3D::RigidBody>();
+    // frobino: body->SetCollisionLayer(1);
+    body->SetMass(10.0f);
+    // Set zero angular factor so that physics doesn't turn the character on its own.
+    // Instead we will control the character yaw manually
+    body->SetAngularFactor(Urho3D::Vector3::ZERO);
+    // Set the rigidbody to signal collision also when in rest, so that we get ground collisions properly
+    // frobino: body->SetCollisionEventMode(Urho3D::COLLISION_ALWAYS);
+    // Set a capsule shape for collision
+    auto* shape = objectNode->CreateComponent<Urho3D::CollisionShape>();
+    // frobino: shape->SetCapsule(0.7f, 1.8f, Urho3D::Vector3(0.0f, 0.9f, 0.0f));
+    // Create the character logic component, which takes care of steering the rigidbody
+    // Remember it so that we can set the controls. Use a WeakPtr because the scene hierarchy already owns it
+    // and keeps it alive as long as it's not removed from the hierarchy
+    
+    // frobino: is this needed? See xml
+    // objectNode->CreateComponent<Character>();
+
+    // spin node (16777238)
+    Urho3D::Node* adjustNode = objectNode->CreateChild("model");
+    adjustNode->SetRotation(Urho3D::Quaternion(180, Urho3D::Vector3(0,1,0) ) );
+    adjustNode->SetPosition(Urho3D::Vector3::ZERO);
+    URHO3D_LOGINFO("model Node instead of XML: " + String(adjustNode->GetID()));
+
+    // Create the rendering component + animation controller
+    auto* object = adjustNode->CreateComponent<Urho3D::AnimatedModel>();
+    auto* cache = GetSubsystem<Urho3D::ResourceCache>();
+    object->SetModel(cache->GetResource<Urho3D::Model>("Models/Mutant/Mutant.mdl"));
+    object->SetMaterial(cache->GetResource<Urho3D::Material>("Models/Mutant/Materials/mutant_M.xml"));
+    object->SetCastShadows(true);
+    // Set the head bone for manual control
+    object->GetSkeleton().GetBone("Mutant:Head")->animated_ = false;
+    adjustNode->CreateComponent<Urho3D::AnimationController>();
+
+    return objectNode;
 }
 
 void Spawner::SpawnExplossion (Urho3D::Vector3 position)

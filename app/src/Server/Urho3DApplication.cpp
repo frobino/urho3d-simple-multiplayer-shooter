@@ -1,6 +1,7 @@
 #include "BuildConfiguration.hpp"
 #include "Urho3DApplication.hpp"
 #include "AiPlayerState.hpp"
+#include "Character.h"
 #include <Shared/Constants.hpp>
 
 #include <Urho3D/Input/Input.h>
@@ -19,7 +20,8 @@ Urho3DApplication::Urho3DApplication (Urho3D::Context *context) : Urho3D::Applic
     playersManager_ (0),
     spawner_ (0)
 {
-
+    // Register factory and attributes for the Character component so it can be created via CreateComponent, and loaded / saved
+    Character::RegisterObject(context);
 }
 
 Urho3DApplication::~Urho3DApplication ()

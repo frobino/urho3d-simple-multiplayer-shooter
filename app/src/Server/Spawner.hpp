@@ -1,6 +1,7 @@
 #pragma once
 #include <Urho3D/Core/Object.h>
 #include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Scene/Node.h>
 #include "PlayerState.hpp"
 
 class Spawner : public Urho3D::Object
@@ -28,5 +29,7 @@ public:
     void SpawnExplossion (Urho3D::Vector3 position);
     void OnExplossion (Urho3D::StringHash eventType, Urho3D::VariantMap &eventData);
     void SpawnShell (PlayerState *player);
+    Urho3D::Node* CreateCharacter (Urho3D::Scene *scene_, Urho3D::Vector3 position);
+    Urho3D::Node* CreateCharacterInsteadOfXML (Urho3D::Node *objectNode, Urho3D::Vector3 position);
 };
 
